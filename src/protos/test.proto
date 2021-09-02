@@ -1,0 +1,40 @@
+// This proto file will be used by 
+// file names that will be generated, and included in the containers/<name>
+// will be:
+//
+//
+//
+
+
+syntax = "proto3";
+
+// ??
+package testProto;
+
+
+service Test {
+	rpc testMe (TestRequest) returns (TestReply) {}
+
+	rpc gProvider (ProviderRequest) returns (ProviderReply) {}
+}
+
+
+message ProviderRequest {
+	string Np = 1;
+}
+
+message ProviderReply {
+	string Np = 1;
+	string certp = 2;
+	int32 responseCode = 3;
+}
+
+
+message TestRequest {
+	string testStringRequest = 1;
+}
+
+
+message TestReply {
+	string testStringReply = 1;
+}

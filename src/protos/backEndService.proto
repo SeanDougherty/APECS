@@ -1,0 +1,47 @@
+// Server here is the Edge Service
+// Client is the Edge Server
+
+syntax = "proto3";
+
+package serviceProto;
+
+
+service BackEndService {
+	// getProvider is end point available on Back End Service
+	// Edge server can request here to get N_p and cer-p from Back End Service
+	rpc getProvider (ProviderRequest) returns (ProviderReply) {}
+
+	// Provider sends cert-p and requests access control
+	rpc registerProvider (CertP) returns (ProviderID) {}
+
+	// Provider notifies Cloud that a new blacklisted token exists
+	rpc registerBlackListedToken(UserToken) returns (BlackListResponse) {}
+
+}
+
+message ProviderRequest {
+	string Np = 1;
+}
+
+message ProviderReply {
+	string Np = 1;
+	string certP = 2;
+	int32 responseCode = 3;
+}
+
+message CertP {
+	string certp = 1;
+}
+
+message ProviderID {
+	string providerid = 1;
+}
+
+message UserToken {
+	string token = 1;
+}
+
+message BlackListResponse {
+	string msg = 1;
+	int32 responseCode = 2;
+}

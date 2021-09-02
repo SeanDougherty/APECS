@@ -1,0 +1,13 @@
+src/containers/Cloud/bes
+src/containers/EdgeServer/es
+src/containers/Provider/provider
+src/containers/User/user
+src/mongo/mongo-c-driver-1.15.3/cmake-build/src/libbson/libbson-1.0.so
+src/mongo/mongo-c-driver-1.15.3/cmake-build/src/libbson/libbson-1.0.so.0
+src/mongo/mongo-c-driver-1.15.3/cmake-build/src/libmongoc/libmongoc-1.0.so
+src/mongo/mongo-c-driver-1.15.3/cmake-build/src/libmongoc/libmongoc-1.0.so.0
+
+*_runtimes.csv
+
+.vscode
+.vscode/*

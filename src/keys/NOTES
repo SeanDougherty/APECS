@@ -1,0 +1,3 @@
+# rsa_priv and rsa_pub belong to the Provider in PEM format
+# www.example.com.cert ( PEM ) belong to User
+# www.example.com.key ( PEM ) belong to User

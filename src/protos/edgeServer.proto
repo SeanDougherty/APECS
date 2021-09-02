@@ -1,0 +1,86 @@
+
+
+syntax = "proto3";
+
+// ??
+package edgeServerProto;
+
+
+service EdgeServerService {
+	//User sends data request to Edge Server
+	rpc requestData ( UserDataRequest) returns (DataPayload) {};
+	rpc requestService ( UserServiceRequest) returns (ServiceResponse) {}; 
+}
+
+message UserDataRequest {
+	string user_token = 1;
+	string content_name = 2;
+    bytes signature = 3;
+}
+
+message DataPayload {
+	string data = 1;
+	string msg = 2;
+	int32 access_level = 3;
+	int32 response_code = 4;
+}
+
+message UserServiceRequest {
+	string user_token = 1;
+	string service_data = 2;
+	string abe_setup_json = 3; // replace w/ contents of setup struct
+	string abe_enc_json = 4; // replace w/ contents of encrypt struct
+	bytes signature = 5;
+
+    // SetupVars
+    bytes Y = 6;
+    bytes g2 = 7;
+    bytes T_1a1 = 8;
+    bytes T_1a2 = 9;
+    bytes T_2a2 = 10;
+    bytes T_2a3 = 11;
+    bytes T_3a1 = 12;
+    bytes T_3a3 = 13;
+    bytes S_1_1_u1 = 14;
+    bytes g1 = 15;
+    bytes coeff_auth1_u1_0 = 16;
+    bytes coeff_auth1_u1_1 = 17;
+    bytes S_1_2_u1 = 18;
+    bytes S_2_2_u1 = 19;
+    bytes coeff_auth2_u1_0 = 20;
+    bytes coeff_auth2_u1_1 = 21;
+    bytes S_2_3_u1 = 22;
+    bytes coeff_auth3_u1_0 = 23;
+    bytes coeff_auth3_u1_1 = 24;
+    bytes S_3_1_u1 = 25;
+    bytes S_3_3_u1 = 26;
+    bytes D_u1 = 27;
+    bytes temp_1_GT = 28;
+    bytes temp_1_Zr = 29;
+    bytes temp_2_Zr = 30;
+    bytes e_g1g2 = 31;
+
+    // EncryptVars
+    bytes E_0 = 32;
+    bytes E_1 = 33;
+    bytes C_1_1 = 34;
+    bytes C_1_2 = 35;
+    bytes C_2_2 = 36;
+    bytes C_2_3 = 37;
+    bytes C_3_1 = 38;
+    bytes C_3_3 = 39;
+    bytes msg = 40;
+    bytes s = 41;
+    bytes L1_0_Auth1 = 42;
+    bytes L2_0_Auth1 = 43;
+    bytes L2_0_Auth2 = 44;
+    bytes L3_0_Auth2 = 45;
+    bytes L1_0_Auth3 = 46;
+    bytes L3_0_Auth3 = 47;
+}
+
+message ServiceResponse {
+	string result = 1;
+}
+
+

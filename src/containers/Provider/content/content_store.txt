@@ -1,0 +1,4 @@
+content_store.txt
+lorem2.txt
+lorem3.txt
+lorem.txt

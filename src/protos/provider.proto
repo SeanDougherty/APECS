@@ -1,0 +1,60 @@
+
+
+syntax = "proto3";
+
+// ??
+package providerProto;
+
+
+service ProviderService {
+	rpc requestDataFromProvider (ProviderDataRequest) returns (ProviderDataPayload) {}
+	rpc registerUser (UserData) returns (UserTokenAndSymKey) {}
+	rpc requestRevocation (RevocRequest) returns (RevocResponse) {}
+	rpc renewToken (UserCredentials) returns (NewToken) {}
+}
+
+message ProviderDataRequest {
+	string content_name = 1;
+}
+
+message ProviderDataPayload {
+	string data = 1;
+	int32 access_level = 2;
+	string msg = 3;
+	int32 response_code = 4;
+}
+
+message UserData {
+	string username = 1;
+	string password = 2;
+	int32 access_level = 3;
+	string optional_data = 4;
+	string certu = 5;
+}
+
+// symkey is bytes
+message UserTokenAndSymKey {
+	string token = 1;
+	string symkey = 2;
+	int32 symkey_length = 3;
+}
+
+message RevocRequest {
+	string revoc_request = 1;
+	string request_signature = 2;
+	string user_token = 3;
+}
+
+message RevocResponse {
+	string msg = 1;
+	int32 response_code = 2;
+}
+
+message UserCredentials {
+	string username = 1;
+	string password = 2;
+}
+
+message NewToken {
+	string user_token = 1;
+}
