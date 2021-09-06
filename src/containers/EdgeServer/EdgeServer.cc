@@ -3,8 +3,6 @@
 
 EdgeServer::EdgeServer(bool isCacheOn) {
 	this->m_isCacheOn = isCacheOn;
-//	constexpr std::size_t CACHE_SIZE = 256;
-//	lfu_cache_t<std::string, std::string> cache(CACHE_SIZE);
 }
 
 /******************************************************************
@@ -15,11 +13,11 @@ EdgeServer::EdgeServer(bool isCacheOn) {
 int EdgeServer::getProvider(std::string providerName, std::string *provider_cert) {
 
 	//Enable TLS Communications
-        auto creds = buildClientCredentials(false);
-        grpc::ChannelArguments channel_args = ChannelArguments();
-        channel_args.SetSslTargetNameOverride("cloud.foo");
+	auto creds = buildClientCredentials(false);
+	grpc::ChannelArguments channel_args = ChannelArguments();
+	channel_args.SetSslTargetNameOverride("cloud.foo");
 	std::unique_ptr<BackEndService::Stub> stub_(BackEndService::NewStub(
-				grpc::CreateCustomChannel(this->m_cloud_ip,creds,channel_args)));
+	grpc::CreateCustomChannel(this->m_cloud_ip,creds,channel_args)));
 
 	//Build Request
 	ProviderRequest request;
@@ -56,11 +54,11 @@ int EdgeServer::getProvider(std::string providerName, std::string *provider_cert
 std::string EdgeServer::requestDataFromProvider(std::string content_name, bool *content_found) {
 
 	//Enable TLS Communications
-        auto creds = buildClientCredentials(false);
-        grpc::ChannelArguments channel_args = ChannelArguments();
-        channel_args.SetSslTargetNameOverride("provider.foo");
+	auto creds = buildClientCredentials(false);
+	grpc::ChannelArguments channel_args = ChannelArguments();
+	channel_args.SetSslTargetNameOverride("provider.foo");
 	std::unique_ptr<ProviderService::Stub> stub_(ProviderService::NewStub(
-				grpc::CreateCustomChannel(this->m_provider_ip,creds,channel_args)));
+	grpc::CreateCustomChannel(this->m_provider_ip,creds,channel_args)));
 	
 	//Build Request
 	ProviderDataRequest request;
@@ -117,9 +115,7 @@ Status EdgeServer::requestData(ServerContext *context, const UserDataRequest *re
 			getProvider(provider_id, &certp);
 		}
 
-
 		std::string rsa_pub = getRSAPubFromCert(certp);
-
 		std::string client_cert;
 
 		/* check the revocation table */
@@ -136,7 +132,6 @@ Status EdgeServer::requestData(ServerContext *context, const UserDataRequest *re
 		//	std::cout << "[!] INVALID TOKEN" << std::endl;
 		}
 		
-		/* LAST STEP */
 		/* search cache and provider for data, if not found, return */
 		std::string content = "";
 		bool content_found = false;
@@ -158,14 +153,12 @@ Status EdgeServer::requestData(ServerContext *context, const UserDataRequest *re
 			return Status::OK;
 		}
 
-
 		/* set the data to return to the User */
 		reply->set_data(content);
 
 		/* set the remaining status fields */
 		reply->set_msg("able to retrieve data");
 		reply->set_response_code(200);
-
 		return Status::OK;
 	} catch (std::exception &e) {
 		std::cout << "Error in EdgeServer::requestData" << std::endl;
@@ -173,7 +166,7 @@ Status EdgeServer::requestData(ServerContext *context, const UserDataRequest *re
 		reply->set_msg(e.what());
 		return Status::OK;
 	}
-}
+} // end requestData
 		
 
 
@@ -223,17 +216,14 @@ Status EdgeServer::requestService(ServerContext *context, const UserServiceReque
 		} else {
 			//std::cout << "[!] INVALID TOKEN" << std::endl;
 		}
-		/* LAST STEP */
-		/* search cache and provider for data, if not found, return */
+
 		py::module_ mabe = py::module_::import("mabe");
 		struct SetupVars setupvars = {(unsigned char *) request->y().data(), (unsigned char *) request->g2().data(), (unsigned char *) request->t_1a1().data(), (unsigned char *) request->t_1a2().data(), (unsigned char *) request->t_2a2().data(), (unsigned char *) request->t_2a3().data(), (unsigned char *) request->t_3a1().data(), (unsigned char *) request->t_3a3().data(), (unsigned char *) request->s_1_1_u1().data(), (unsigned char *) request->g1().data(), (unsigned char *) request->coeff_auth1_u1_0().data(), (unsigned char *) request->coeff_auth1_u1_1().data(), (unsigned char *) request->s_1_2_u1().data(), (unsigned char *) request->s_2_2_u1().data(), (unsigned char *) request->coeff_auth2_u1_0().data(), (unsigned char *) request->coeff_auth2_u1_1().data(), (unsigned char *) request->s_2_3_u1().data(), (unsigned char *) request->coeff_auth3_u1_0().data(), (unsigned char *) request->coeff_auth3_u1_1().data(), (unsigned char *) request->s_3_1_u1().data(), (unsigned char *) request->s_3_3_u1().data(), (unsigned char *) request->d_u1().data(), (unsigned char *) request->temp_1_gt().data(), (unsigned char *) request->temp_1_zr().data(), (unsigned char *) request->temp_2_zr().data(), (unsigned char *) request->e_g1g2().data()  };
 		struct EncryptVars encryptvars = { (unsigned char *) request->e_0().data(), (unsigned char *) request->e_1().data(), (unsigned char *) request->c_1_1().data(), (unsigned char *) request->c_1_2().data(), (unsigned char *) request->c_2_2().data(), (unsigned char *) request->c_2_3().data(), (unsigned char *) request->c_3_1().data(), (unsigned char *) request->c_3_3().data(), (unsigned char *) request->msg().data(), (unsigned char *) request->s().data(), (unsigned char *) request->l1_0_auth1().data(), (unsigned char *) request->l2_0_auth1().data(), (unsigned char *) request->l2_0_auth2().data(), (unsigned char *) request->l3_0_auth2().data(), (unsigned char *) request->l1_0_auth3().data(), (unsigned char *) request->l3_0_auth3().data() };
 		auto dec_start = std::chrono::high_resolution_clock::now();
     c_decrypt(&setupvars, &encryptvars);
-	  //Load setup_dict into pyObject
 		auto dec_stop = std::chrono::high_resolution_clock::now();
 		auto symdec_start = std::chrono::high_resolution_clock::now();
-
 		py::object result = mabe.attr("decryptPayload2")("12345678901234567890",  service_data);
 		std::string decrypted_msg = result.cast<std::string>();
 		auto symdec_stop = std::chrono::high_resolution_clock::now();
@@ -252,7 +242,7 @@ Status EdgeServer::requestService(ServerContext *context, const UserServiceReque
 		this->elapsed_decs[idx] = dec_micro;
 		this->elapsed_symdecs[idx] = symdec_micro;
 		this->service_ct += 1;
-   		if (idx == this->test_ct-1) {
+   	if (idx == this->test_ct-1) {
 			std::string verifs = "";
 			std::string signverifs = "";
 			std::string decs = "";
@@ -276,16 +266,15 @@ Status EdgeServer::requestService(ServerContext *context, const UserServiceReque
 			stringToFile(signverifs, "signverif_runtimes.csv");
 		}
 
-
 		/* set the remaining status fields */
 		reply->set_result("Success!");
 
 		return Status::OK;
 	} catch (std::exception &e) {
 		reply->set_result(e.what());
-	} 
 		return Status::OK;
-}
+	} 
+} // end requestService
 
 bool EdgeServer::verifySignature(std::string service_data, std::string token, std::string signature){
 	auto decoded = jwt::decode(token);
@@ -304,32 +293,31 @@ void EdgeServer::startServer() {
 
 void EdgeServer::startEdgeServer() {
 
-        //Enable TLS communications
-        std::string key = fileToString("../keys/edgeserver.key");
-        std::string crt = fileToString("../keys/edgeserver.crt");
-        std::string ca = fileToString("../keys/ca.crt"); 
-        grpc::SslServerCredentialsOptions::PemKeyCertPair pkcp ={key,crt};      
-        grpc::SslServerCredentialsOptions ssl_opts(GRPC_SSL_REQUEST_CLIENT_CERTIFICATE_BUT_DONT_VERIFY);
-        ssl_opts.pem_root_certs=ca;
-        ssl_opts.pem_key_cert_pairs.push_back(pkcp);
-        //std::shared_ptr<ServerCredentials> creds;
+	//Enable TLS communications
+	std::string key = fileToString("../keys/edgeserver.key");
+	std::string crt = fileToString("../keys/edgeserver.crt");
+	std::string ca = fileToString("../keys/ca.crt"); 
+	grpc::SslServerCredentialsOptions::PemKeyCertPair pkcp ={key,crt};      
+	grpc::SslServerCredentialsOptions ssl_opts(GRPC_SSL_REQUEST_CLIENT_CERTIFICATE_BUT_DONT_VERIFY);
+	ssl_opts.pem_root_certs=ca;
+	ssl_opts.pem_key_cert_pairs.push_back(pkcp);
+	//std::shared_ptr<ServerCredentials> creds;
 	//creds = grpc::SslServerCredentials(ssl_opts);
 	auto creds = grpc::InsecureServerCredentials();
 
 	// Start the server
-        std::string server_address("0.0.0.0:50033");
-        ServerBuilder builder;
-        builder.AddListeningPort(server_address,creds);
-        builder.RegisterService(this);
+	std::string server_address("0.0.0.0:50033");
+	ServerBuilder builder;
+	builder.AddListeningPort(server_address,creds);
+	builder.RegisterService(this);
 
-        std::unique_ptr<Server> server(builder.BuildAndStart());
-        std::cout << "Server listening on " << server_address << std::endl;
+	std::unique_ptr<Server> server(builder.BuildAndStart());
+	std::cout << "Server listening on " << server_address << std::endl;
 
 	this->user_cert = fileToString("../keys/user.crt");
 
-        // Server now waits and answers all requests
-        server->Wait();
-
+	// Server now waits and answers all requests
+	server->Wait();
 }
 
 /******************************************************************
@@ -338,31 +326,31 @@ void EdgeServer::startEdgeServer() {
 
 std::shared_ptr<grpc::ChannelCredentials> EdgeServer::buildClientCredentials(bool isSecure) {
 
-        if (!isSecure)
-                return std::shared_ptr<grpc::ChannelCredentials>(grpc::InsecureChannelCredentials());
+	if (!isSecure)
+		return std::shared_ptr<grpc::ChannelCredentials>(grpc::InsecureChannelCredentials());
 
-        std::string key = fileToString("../keys/edgeserver.key");
-        std::string crt = fileToString("../keys/edgeserver.crt");
-        std::string ca = fileToString("../keys/ca.crt");
-        grpc::SslCredentialsOptions tlsOpts;
-        tlsOpts.pem_cert_chain = crt;
-        tlsOpts.pem_private_key = key;
-        tlsOpts.pem_root_certs = ca;
-        return std::shared_ptr<grpc::ChannelCredentials>(grpc::SslCredentials(tlsOpts));
+	std::string key = fileToString("../keys/edgeserver.key");
+	std::string crt = fileToString("../keys/edgeserver.crt");
+	std::string ca = fileToString("../keys/ca.crt");
+	grpc::SslCredentialsOptions tlsOpts;
+	tlsOpts.pem_cert_chain = crt;
+	tlsOpts.pem_private_key = key;
+	tlsOpts.pem_root_certs = ca;
+	return std::shared_ptr<grpc::ChannelCredentials>(grpc::SslCredentials(tlsOpts));
 }// end buildClientCredentials
 
 
 std::string EdgeServer::fileToString(std::string filename) {
-        std::ifstream f(filename);
-        if(!f.is_open()) {
-                std::cout << "Could not open file: " + filename << std::endl;
-                exit(0);
-        }
-        std::stringstream ss;
-        ss << f.rdbuf();
-        std::string fstr = ss.str();
-        f.close();
-        return fstr;
+	std::ifstream f(filename);
+	if(!f.is_open()) {
+		std::cout << "Could not open file: " + filename << std::endl;
+		exit(0);
+	}
+	std::stringstream ss;
+	ss << f.rdbuf();
+	std::string fstr = ss.str();
+	f.close();
+	return fstr;
 } // end fileToString
 
 
@@ -396,12 +384,8 @@ bool EdgeServer::isExpired(const std::string& cert) {
 }//end isExpired
 
 std::string EdgeServer::getDataForUser(const std::string& content_name, bool *content_found) {
-
 	std::string dataToReturn = "";
-	/* If cache is enable search cache first */
 	dataToReturn = requestDataFromProvider(content_name, content_found);
-
-	/* if content is not found in cache or provider, set to false */
 	return dataToReturn;
 }//end getDataForUser
 
@@ -438,67 +422,67 @@ int EdgeServer::storeProviderAndCert(ProviderReply reply) {
 }// end storeProviderAndCert
 
 std::string EdgeServer::getProviderCertForId(std::string provider_id) {
-        try {
+	try {
 		//Create database client
-                static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
-                static const mongocxx::client client(uri);
+		static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
+		static const mongocxx::client client(uri);
 		
 		//Specify location in database
-                auto collection = client["EdgeServerDB"]["providerTable"];
+		auto collection = client["EdgeServerDB"]["providerTable"];
 
 		//Lookup entry
-                bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
-                                document{} <<
-                                "_id" << provider_id
-                                << finalize);
+		bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
+			document{} <<
+			"_id" << provider_id
+			<< finalize);
 
 		//If found, handle
-                if(maybe_result) {
+		if(maybe_result) {
 			bsoncxx::document::view result_view = maybe_result.value().view();
-                        bsoncxx::document::element result_element = result_view["pCert"];
-                        std::string provider_cert = result_element.get_utf8().value.to_string();
-                        //std::cout << "Successfully found Provider Cert!" << std::endl;
-                        return provider_cert;
-                }
+			bsoncxx::document::element result_element = result_view["pCert"];
+			std::string provider_cert = result_element.get_utf8().value.to_string();
+			//std::cout << "Successfully found Provider Cert!" << std::endl;
+			return provider_cert;
+		}
 		
 		//Improve handling of "not found" condition
-                //std::cout << "No token found" << std::endl;
-                return "error";
-        } catch (std::exception &e) {
-                std::cout << e.what() << std::endl;
-                std::cout << "Error searching for provider_id in EdgeServer::getProviderKeyFromToken" << std::endl;
-                return "error";
-        }
+		//std::cout << "No token found" << std::endl;
+		return "error";
+	} catch (std::exception &e) {
+		std::cout << e.what() << std::endl;
+		std::cout << "Error searching for provider_id in EdgeServer::getProviderKeyFromToken" << std::endl;
+		return "error";
+	}
 }//end getProviderCertForId
 
 bool EdgeServer::isRevoked(const std::string& token) {
 	try {
 		//Create database client
 		static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
-                static const mongocxx::client client(uri);
+		static const mongocxx::client client(uri);
 
 		//Specify location in database
-                auto collection = client["EdgeServerDB"]["revocTable"];
+		auto collection = client["EdgeServerDB"]["revocTable"];
 
 		//Lookup entry
-                bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
-                                document{} <<
-                                "revocToken" << token
-                                << finalize);
+		bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
+			document{} <<
+			"revocToken" << token
+			<< finalize);
 
 		//If found, handle
-                if(maybe_result) {
-                        std::cout << "this token is revoked!" << std::endl;
+		if(maybe_result) {
+			std::cout << "this token is revoked!" << std::endl;
 			return true;
-                }
+		}
 
-                //std::cout << "No token found" << std::endl;
-                return false;
-        } catch (std::exception &e) {
-                std::cout << e.what() << std::endl;
-                std::cout << "Error verifying if token was revoked. Preventing data request as a precaution" << std::endl;
-                return true;
-        }
+		//std::cout << "No token found" << std::endl;
+		return false;
+	} catch (std::exception &e) {
+		std::cout << e.what() << std::endl;
+		std::cout << "Error verifying if token was revoked. Preventing data request as a precaution" << std::endl;
+		return true;
+	}
 }//end isRevoked
 
 int EdgeServer::storeRevocatedToken(std::string revocTokenHash) {

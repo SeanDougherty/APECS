@@ -1,14 +1,5 @@
-// This proto file will be used by 
-// file names that will be generated, and included in the containers/<name>
-// will be:
-//
-//
-//
-
-
 syntax = "proto3";
 
-// ??
 package testProto;
 
 

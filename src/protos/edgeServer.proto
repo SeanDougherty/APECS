@@ -2,12 +2,10 @@
 
 syntax = "proto3";
 
-// ??
 package edgeServerProto;
 
 
 service EdgeServerService {
-	//User sends data request to Edge Server
 	rpc requestData ( UserDataRequest) returns (DataPayload) {};
 	rpc requestService ( UserServiceRequest) returns (ServiceResponse) {}; 
 }
@@ -28,8 +26,8 @@ message DataPayload {
 message UserServiceRequest {
 	string user_token = 1;
 	string service_data = 2;
-	string abe_setup_json = 3; // replace w/ contents of setup struct
-	string abe_enc_json = 4; // replace w/ contents of encrypt struct
+	string abe_setup_json = 3; 
+	string abe_enc_json = 4; 
 	bytes signature = 5;
 
     // SetupVars

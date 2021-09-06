@@ -2,7 +2,6 @@
 
 syntax = "proto3";
 
-// ??
 package providerProto;
 
 
@@ -32,7 +31,6 @@ message UserData {
 	string certu = 5;
 }
 
-// symkey is bytes
 message UserTokenAndSymKey {
 	string token = 1;
 	string symkey = 2;

@@ -1,6 +1,3 @@
-// Server here is the Edge Service
-// Client is the Edge Server
-
 syntax = "proto3";
 
 package serviceProto;
