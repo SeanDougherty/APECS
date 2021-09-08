@@ -1114,37 +1114,25 @@ struct SetupVars* c_setup() {
     }
     element_clear(temp_1);
     element_clear(temp_2);
-    //printf("clear temp_2\n");
     element_clear(temp_3);
     element_clear(temp_4);
-    //printf("clear temp_4\n");
     element_clear(temp_5);
     element_clear(test_D_u1);
-    //printf("clear test_D_u1\n");
 
     pbc_set_memory_functions(malloc, realloc, free);
-    //printf("setup cleanup start\n");
     int n, result;
     struct SetupVars *setupvars = (struct SetupVars *) malloc(sizeof(struct SetupVars));
     n = element_length_in_bytes(Y);
     setupvars->Y = (unsigned char *) malloc(n*sizeof(unsigned char));
-    //printf("malloc Y done\n");
     result = element_to_bytes(setupvars->Y, Y);
-    //printf("element_to_bytes Y done %d\n", n);
     n = element_length_in_bytes(g2);
-    //printf("Num of bytes g2: %d\n", n);
     setupvars->g2 = (unsigned char *) malloc(n*sizeof(unsigned char));
-    //printf("g2 malloc passed \n");
     result = element_to_bytes(setupvars->g2, g2);
-    //printf("malloc g2 done\n");
     n = element_length_in_bytes(T_1a1);
     setupvars->T_1a1 = (unsigned char *) malloc(n);
     element_to_bytes(setupvars->T_1a1, T_1a1);
-    //printf("test1\n");
-    //n = element_length_in_bytes(T_1a2);
     setupvars->T_1a2 = (unsigned char *) malloc(n);
     element_to_bytes(setupvars->T_1a2, T_1a2);
-    //printf("test2\n");
     n = element_length_in_bytes(T_2a2);
     setupvars->T_2a2 = (unsigned char *) malloc(n);
     element_to_bytes(setupvars->T_2a2, T_2a2);
@@ -1223,20 +1211,6 @@ struct SetupVars* c_setup() {
     return setupvars;
 }
 
-    //#user u2 calculates D_u
-    //D_u2 = D_12_u2 * D_13_u2 * D_21_u2 * D_23_u2 * D_31_u2 * D_32_u2
-    //if D_u2 == (g1 ** (R_12_u2 + R_13_u2 + R_21_u2 + R_23_u2 + R_31_u2 + R_32_u2)):
-    //    print("D_u2 check succeeded")
-    //else:
-    //    print("D_u2 check failed")
-    //
-    //#user u3 calculates D_u
-    //D_u3 = D_12_u3 * D_13_u3 * D_21_u3 * D_23_u3 * D_31_u3 * D_32_u3
-    //if D_u3 == (g1 ** (R_12_u3 + R_13_u3 + R_21_u3 + R_23_u3 + R_31_u3 + R_32_u3)):
-    //    print("D_u3 check succeeded")
-    //else:
-    //    print("D_u3 check failed")
-    //
 struct EncryptVars* c_encrypt(struct SetupVars* setupvars) {
 
     //printf("encrypt start\n");
@@ -1520,58 +1494,10 @@ int c_decrypt(struct SetupVars* setupvars, struct EncryptVars* encryptvars) {
     //auth1_pair_a1 = pair(S_1_1_u1, C_1_1)
     element_init_GT(auth1_pair_a1, pairing);
     element_pairing(auth1_pair_a1, S_1_1_u1, C_1_1); // auth1_pair_a1 = e(S_1_1_u1, C_1_1)
-  /* 
-    //if auth1_pair_a1 == (pair(g1,g2) ** (s * p(1, coeff_auth1_u1))):
-    //    print("auth1 attr1 dec 1 (a) step Successful")
-    //else:
-    //    print("auth1 attr1 dec 1 (a) step failed")
-    element_init_Zr(temp_1, pairing); 
-    element_init_Zr(temp_2, pairing);
-    element_init_Zr(temp_3, pairing);
-    element_init_GT(temp_auth1_pair_a1, pairing);
-//    element_printf("\n\n ported coeff_auth1_u1: %B\n\n", coeff_auth1_u1_1);
-    element_mul_si(temp_1,coeff_auth1_u1_0,1);
-    element_add(temp_2,temp_1,coeff_auth1_u1_1);
-    element_mul(temp_3, temp_2, s);
-    element_pow_zn(temp_auth1_pair_a1, e_g1g2, temp_3); 
-    
-    if (element_cmp(auth1_pair_a1, temp_auth1_pair_a1) == 0) {
-        //printf("auth1 attr1 dec 1 (a) step Successful\n");
-    }
-    else {
-        //printf("auth1 attr1 dec 1 (a) step failed \n");
-    }
-    element_clear(temp_1);
-    element_clear(temp_2);
-    element_clear(temp_3);
-    element_clear(temp_auth1_pair_a1);
-*/
+
     //auth1_pair_a2 = pair(S_1_2_u1, C_1_2)
     element_init_GT(auth1_pair_a2, pairing);
     element_pairing(auth1_pair_a2, S_1_2_u1, C_1_2); // auth1_pair_a2= e(S_1_2_u1, C_1_2)
-    //if auth1_pair_a2 == (pair(g1,g2) ** (s * p(2, coeff_auth1_u1))):
-    //    print("auth1 attr2 dec 1 (a) step Successful")
-    //else:
-    //    print("auth1 attr2 dec 1 (a) step failed")
-/*    element_init_Zr(temp_1, pairing); 
-    element_init_Zr(temp_2, pairing);
-    element_init_Zr(temp_3, pairing);
-    element_init_GT(temp_auth1_pair_a2, pairing);
-    element_mul_si(temp_1,coeff_auth1_u1_0,2);
-    element_add(temp_2,temp_1,coeff_auth1_u1_1);
-    element_mul(temp_3, temp_2, s);
-    element_pow_zn(temp_auth1_pair_a2, e_g1g2, temp_3); 
-    if (element_cmp(auth1_pair_a2, temp_auth1_pair_a2) == 0) {
-        //printf("auth1 attr2 dec 1 (a) step Successful\n");
-    }
-    else {
-        //printf("auth1 attr2 dec 1 (a) step failed \n");
-    }
-    element_clear(temp_1);
-    element_clear(temp_2);
-    element_clear(temp_3);
-    element_clear(temp_auth1_pair_a2);
-*/
 
     //#interpolate values for P_1
     //P_1 = (auth1_pair_a1 ** L1_0_Auth1) * (auth1_pair_a2 ** L2_0_Auth1)
@@ -1583,86 +1509,15 @@ int c_decrypt(struct SetupVars* setupvars, struct EncryptVars* encryptvars) {
     element_mul(P_1, temp_1, temp_2); 
     element_clear(temp_1);
     element_clear(temp_2);
-/*
-    //if P_1 == (pair(g1,g2) ** (s * p(0, coeff_auth1_u1))):
-    //    print("auth1 dec 1(b) Successful")
-    //else:
-    //    print("auth1 dec 1(b) failed")
-    element_init_Zr(temp_1, pairing);
-    element_init_Zr(temp_2, pairing);
-    element_init_Zr(temp_3, pairing);
-    element_init_GT(temp_P_1, pairing);
-    element_mul_si(temp_1,coeff_auth1_u1_0,0);
-    element_add(temp_2,temp_1,coeff_auth1_u1_1);
-    element_mul(temp_3, temp_2, s);
-    element_pow_zn(temp_P_1, e_g1g2, temp_3);
-    if (element_cmp(P_1, temp_P_1) == 0) {
-        //printf("auth1 dec 1(b) Successful\n");
-    }
-    else {
-        //printf("auth1 dec 1(b) failed\n");
-    }
-    element_clear(temp_1);
-    element_clear(temp_2);
-    element_clear(temp_P_1);
-*/
 
     //#a2,a3 attr from auth2
     //auth2_pair_a2 = pair(S_2_2_u1, C_2_2)
     element_init_GT(auth2_pair_a2, pairing);
     element_pairing(auth2_pair_a2, S_2_2_u1, C_2_2); // auth2_pair_a2 = e(S_2_2_u1, C_2_2)
-/*
-    //if auth2_pair_a2 == (pair(g1,g2) ** (s * p(2, coeff_auth2_u1))):
-    //    print("auth2 attr2 dec 1 (a) step Successful")
-    //else:
-    //    print("auth1 attr2 dec 1 (a) step failed")
-    element_init_Zr(temp_1, pairing); 
-    element_init_Zr(temp_2, pairing);
-    element_init_Zr(temp_3, pairing);
-    element_init_GT(temp_auth2_pair_a2, pairing);
-    element_mul_si(temp_1,coeff_auth2_u1_0,2);
-    element_add(temp_2,temp_1,coeff_auth2_u1_1);
-    element_mul(temp_3, temp_2, s);
-    element_pow_zn(temp_auth2_pair_a2, e_g1g2, temp_3);  
-
-    if (element_cmp(auth2_pair_a2, temp_auth2_pair_a2) == 0) {
-        //printf("auth2 attr2 dec 1 (a) step Successful\n");
-    }
-    else {
-        //printf("auth2 attr2 dec 1 (a) step failed \n");
-    }
-    element_clear(temp_1);
-    element_clear(temp_2);
-    element_clear(temp_3);
-    element_clear(temp_auth2_pair_a2);
-*/
+  
     //auth2_pair_a3 = pair(S_2_3_u1, C_2_3)
     element_init_GT(auth2_pair_a3, pairing);
     element_pairing(auth2_pair_a3, S_2_3_u1, C_2_3); // auth1_pair_a2= e(S_1_2_u1, C_1_2)
-    //if auth2_pair_a3 == (pair(g1,g2) ** (s * p(3, coeff_auth2_u1))):
-    //    print("auth2 attr3 dec 1 (a) step Successful")
-    //else:
-    //    print("auth2 attr3 dec 1 (a) step failed")
-/*    element_init_Zr(temp_1, pairing); 
-    element_init_Zr(temp_2, pairing);
-    element_init_Zr(temp_3, pairing);
-    element_init_GT(temp_auth2_pair_a3, pairing);
-    element_mul_si(temp_1,coeff_auth2_u1_0,3);
-    element_add(temp_2,temp_1,coeff_auth2_u1_1);
-    element_mul(temp_3, temp_2, s);
-    element_pow_zn(temp_auth2_pair_a3, e_g1g2, temp_3); 
-    if (element_cmp(auth2_pair_a3, temp_auth2_pair_a3) == 0) {
-        //printf("auth2 attr3 dec 1 (a) step Successful\n");
-    }
-    else {
-        //printf("auth2 attr3 dec 1 (a) step failed\n");
-    }
-    element_clear(temp_1);
-    element_clear(temp_2);
-    element_clear(temp_3);
-    element_clear(temp_auth2_pair_a3);
-
-*/
 
     //#interpolate values for P_2
     //P_2 = (auth2_pair_a2 ** 3) * ((auth2_pair_a3 ** (-1)) ** 2)
@@ -1674,82 +1529,16 @@ int c_decrypt(struct SetupVars* setupvars, struct EncryptVars* encryptvars) {
     element_mul(P_2, temp_1, temp_2); 
     element_clear(temp_1);
     element_clear(temp_2);
-    //if P_2 == (pair(g1,g2) ** (s * p(0, coeff_auth2_u1))):
-    //    print("auth2 dec 1(b) Successful")
-    //else:
-    //    print("auth2 dec 1(b) failed")
-/*    element_init_Zr(temp_1, pairing);
-    element_init_Zr(temp_2, pairing);
-    element_init_Zr(temp_3, pairing);
-    element_init_GT(temp_P_2, pairing);
-    element_mul_si(temp_1,coeff_auth2_u1_0,0);
-    element_add(temp_2,temp_1,coeff_auth2_u1_1);
-    element_mul(temp_3, temp_2, s);
-    element_pow_zn(temp_P_2, e_g1g2, temp_3);
-    if (element_cmp(P_2, temp_P_2) == 0) {
-        //printf("auth2 dec 1(b) Successful\n");
-    }
-    else {
-        //printf("auth2 dec 1(b) failed\n");
-    }
-    element_clear(temp_1);
-    element_clear(temp_2);
-    element_clear(temp_P_2);
-  */  
 
     //#a1,a3 attr from auth3
     //auth3_pair_a1 = pair(S_3_1_u1, C_3_1)
     element_init_GT(auth3_pair_a1, pairing);
     element_pairing(auth3_pair_a1, S_3_1_u1, C_3_1); // auth3_pair_a1= e(S_3_1_u1, C_3_1)
-    //if auth3_pair_a1 == (pair(g1,g2) ** (s * p(1, coeff_auth3_u1))):
-    //    print("auth3 attr1 dec 1 (a) step Successful")
-    //else:
-    //    print("auth3 attr1 dec 1 (a) step failed")
-/*    element_init_Zr(temp_1, pairing); 
-    element_init_Zr(temp_2, pairing);
-    element_init_Zr(temp_3, pairing);
-    element_init_GT(temp_auth3_pair_a1, pairing);
-    element_mul_si(temp_1,coeff_auth3_u1_0,1);
-    element_add(temp_2,temp_1,coeff_auth3_u1_1);
-    element_mul(temp_3, temp_2, s);
-    element_pow_zn(temp_auth3_pair_a1, e_g1g2, temp_3); 
-    if (element_cmp(auth3_pair_a1, temp_auth3_pair_a1) == 0) {
-        //printf("auth3 attr1 dec 1 (a) step Successful\n");
-    }
-    else {
-        //printf("auth3 attr1 dec 1 (a) step failed \n");
-    }
-    element_clear(temp_1);
-    element_clear(temp_2);
-    element_clear(temp_3);
-    element_clear(temp_auth3_pair_a1); 
-*/    
+  
     //auth3_pair_a3 = pair(S_3_3_u1, C_3_3)
     element_init_GT(auth3_pair_a3, pairing);
     element_pairing(auth3_pair_a3, S_3_3_u1, C_3_3); // auth3_pair_a3= e(S_3_3_u1, C_3_3)
-    //if auth3_pair_a3 == (pair(g1,g2) ** (s * p(3, coeff_auth3_u1))):
-    //    print("auth3 attr3 dec 1 (a) step Successful")
-    //else:
-    //    print("auth3 attr3 dec 1 (a) step failed")
-/*    element_init_Zr(temp_1, pairing); 
-    element_init_Zr(temp_2, pairing);
-    element_init_Zr(temp_3, pairing);
-    element_init_GT(temp_auth3_pair_a3, pairing);
-    element_mul_si(temp_1,coeff_auth3_u1_0,3);
-    element_add(temp_2,temp_1,coeff_auth3_u1_1);
-    element_mul(temp_3, temp_2, s);
-    element_pow_zn(temp_auth3_pair_a3, e_g1g2, temp_3); 
-    if (element_cmp(auth3_pair_a3, temp_auth3_pair_a3) == 0) {
-        //printf("auth3 attr3 dec 1 (a) step Successful\n");
-    }
-    else {
-        //printf("auth3 attr3 dec 1 (a) step failed \n");
-    }
-    element_clear(temp_1);
-    element_clear(temp_2);
-    element_clear(temp_3);
-    element_clear(temp_auth3_pair_a3);
-*/
+  
     //#interpolate values for P_3
     //# P_3 =  (auth3_pair_a1 ** L1_0_Auth3) * (auth3_pair_a3 ** L3_0_Auth3)   
     //P_3 =  ((auth3_pair_a1 ** 3) ** modinv(2,q)) * ((auth3_pair_a3 ** -1) ** modinv(2,q))
@@ -1762,30 +1551,6 @@ int c_decrypt(struct SetupVars* setupvars, struct EncryptVars* encryptvars) {
     element_clear(temp_1);
     element_clear(temp_2);
 
-    //if P_3 == (pair(g1,g2) ** (s * p(0, coeff_auth3_u1))):
-    //    print("auth3 dec 1(b) Successful")
-    //else:
-    //    print("auth3 dec 1(b) failed")
-/*    element_init_Zr(temp_1, pairing);
-    element_init_Zr(temp_2, pairing);
-    element_init_Zr(temp_3, pairing);
-    element_init_GT(temp_P_3, pairing);
-    element_mul_si(temp_1,coeff_auth3_u1_0,0);
-    element_add(temp_2,temp_1,coeff_auth3_u1_1);
-    element_mul(temp_3, temp_2, s);
-    element_pow_zn(temp_P_3, e_g1g2, temp_3);
-    if (element_cmp(P_3, temp_P_3) == 0) {
-        //printf("auth3 dec 1(b) Successful\n");
-    }
-    else {
-        //printf("auth3 dec 1(b) failed\n");
-    }
-    
-    element_clear(temp_1);
-    element_clear(temp_2);
-    element_clear(temp_3);
-    element_clear(temp_P_3); 
-*/
     //Q = P_1 * P_2 * P_3
     element_init_GT(Q, pairing);
     element_init_GT(temp_1, pairing);

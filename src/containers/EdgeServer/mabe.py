@@ -6,7 +6,6 @@ from charm.core.engine.util import objectToBytes,bytesToObject
  
 
 from hashlib import sha256
-#from pprint import pprint
 
 
 import sys
@@ -137,8 +136,6 @@ def setup():
     Y = Y_1 * Y_2 * Y_3
 
     #authorities also give NIZKP of v_k and x_k
-    #TODO
-
 
     #Auth1 stores
     MSK_1 = (x_1, (s_12, s_13), (t_1a1, t_1a2, t_1a3, t_1a4))
