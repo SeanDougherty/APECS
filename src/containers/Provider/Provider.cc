@@ -216,25 +216,25 @@ Status Provider::renewToken(ServerContext *context, const UserCredentials *reque
 std::string Provider::getTokenForUserId(std::string u_id) {
 	try {
 		static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
-                static const mongocxx::client client(uri);
+		static const mongocxx::client client(uri);
 
-                auto collection = client["ProviderDB"]["userTable"];
+		auto collection = client["ProviderDB"]["userTable"];
 
-                bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
-				document{} << 
-				"_id" << bsoncxx::oid{bsoncxx::stdx::string_view{u_id}}
-				<< finalize);
+		bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
+			document{} << 
+			"_id" << bsoncxx::oid{bsoncxx::stdx::string_view{u_id}}
+			<< finalize);
 
-                if(maybe_result) {
-                        bsoncxx::document::view result_view = maybe_result.value().view();
-                        bsoncxx::document::element result_element = result_view["token"];
-                        std::string token = result_element.get_utf8().value.to_string();
-                        std::cout << "Successfully found user token!" << std::endl;
-                        return token;
-                }
+	if(maybe_result) {
+		bsoncxx::document::view result_view = maybe_result.value().view();
+		bsoncxx::document::element result_element = result_view["token"];
+		std::string token = result_element.get_utf8().value.to_string();
+		std::cout << "Successfully found user token!" << std::endl;
+		return token;
+	}
 
-                std::cerr << "[Provider.cc] Error, No User found with that ID" << '\n';
-                return "0";
+		std::cerr << "[Provider.cc] Error, No User found with that ID" << '\n';
+		return "0";
 	} catch (std::exception &e) {
 		std::cerr << "[Provider.cc] " << e.what() << '\n';
 		std::cerr << "[Provider.cc] Error, querying the database failed in Provider::getTokenForUserId" << '\n';
@@ -243,28 +243,28 @@ std::string Provider::getTokenForUserId(std::string u_id) {
 }
 
 std::string Provider::getUserIdFromToken(std::string user_token) {
-        auto decoded = jwt::decode(user_token);
-        auto u_id = decoded.get_payload_claims().find("user_id");
-        return std::string(u_id->second.as_string());
+	auto decoded = jwt::decode(user_token);
+	auto u_id = decoded.get_payload_claims().find("user_id");
+	return std::string(u_id->second.as_string());
 
 }
 
 std::string Provider::generateToken(std::string user_id, std::string cert) {
-        /* Read the priv and pub keys for the provider 
-         * These will be used later for signing tokens. 
-         */
-        std::string rsa_priv = fileToString("../keys/provider.key");
-        std::string rsa_crt = fileToString("../keys/provider.crt");
-        std::string rsa_pub = getRSAPubFromCert(rsa_crt);
-	
+	/* Read the priv and pub keys for the provider 
+		* These will be used later for signing tokens. 
+		*/
+	std::string rsa_priv = fileToString("../keys/provider.key");
+	std::string rsa_crt = fileToString("../keys/provider.crt");
+	std::string rsa_pub = getRSAPubFromCert(rsa_crt);
+
 	auto token = jwt::create()
-               	.set_issuer("Netflix")
-               	.set_type("JWS")
-               	.set_payload_claim("certu",jwt::claim(cert))
-               	.set_payload_claim("provider_id", jwt::claim(getProviderId()))
-               	.set_payload_claim("user_id", jwt::claim(user_id))
-               	.set_expires_at(std::chrono::system_clock::now() + std::chrono::seconds{2630000}) //One month expiry
-               	.sign(jwt::algorithm::rs256(rsa_pub,rsa_priv,"",""));
+								.set_issuer("Netflix")
+								.set_type("JWS")
+								.set_payload_claim("certu",jwt::claim(cert))
+								.set_payload_claim("provider_id", jwt::claim(getProviderId()))
+								.set_payload_claim("user_id", jwt::claim(user_id))
+								.set_expires_at(std::chrono::system_clock::now() + std::chrono::seconds{2630000}) //One month expiry
+								.sign(jwt::algorithm::rs256(rsa_pub,rsa_priv,"",""));
 
 	return token;
 }
@@ -272,25 +272,25 @@ std::string Provider::generateToken(std::string user_id, std::string cert) {
 std::string Provider::getCertForUserId(std::string u_id) {
 	try {
 		static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
-                static const mongocxx::client client(uri);
+		static const mongocxx::client client(uri);
 
-                auto collection = client["ProviderDB"]["userTable"];
+		auto collection = client["ProviderDB"]["userTable"];
 
-                bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
-				document{} << 
-				"_id" << bsoncxx::oid{bsoncxx::stdx::string_view{u_id}}
-				<< finalize);
+		bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
+			document{} << 
+			"_id" << bsoncxx::oid{bsoncxx::stdx::string_view{u_id}}
+			<< finalize);
 
-                if(maybe_result) {
-                        bsoncxx::document::view result_view = maybe_result.value().view();
-                        bsoncxx::document::element result_element = result_view["uCert"];
-                        std::string cert = result_element.get_utf8().value.to_string();
-                        std::cout << "Successfully found user cert!" << std::endl;
-                        return cert;
-                }
+		if(maybe_result) {
+			bsoncxx::document::view result_view = maybe_result.value().view();
+			bsoncxx::document::element result_element = result_view["uCert"];
+			std::string cert = result_element.get_utf8().value.to_string();
+			std::cout << "Successfully found user cert!" << std::endl;
+			return cert;
+		}
 
-                std::cerr << "[Provider.cc] Error, No User found with that ID" << '\n';
-                return "0";
+		std::cerr << "[Provider.cc] Error, No User found with that ID" << '\n';
+		return "0";
 	} catch (std::exception &e) {
 		std::cerr << "[Provider.cc] " << e.what() << '\n';
 		std::cerr << "[Provider.cc] Error, querying the database failed in Provider::getCertForUserId" << '\n';
@@ -302,14 +302,14 @@ std::string Provider::getCertForUserId(std::string u_id) {
 int Provider::removeUserForUserId(std::string u_id) {
 	try {
 		static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
-                static const mongocxx::client client(uri);
+		static const mongocxx::client client(uri);
 
-                auto collection = client["ProviderDB"]["userTable"];
+		auto collection = client["ProviderDB"]["userTable"];
 
-                collection.delete_one(
-				document{} << 
-				"_id" << bsoncxx::oid{bsoncxx::stdx::string_view{u_id}}
-				<< finalize);
+		collection.delete_one(
+			document{} << 
+			"_id" << bsoncxx::oid{bsoncxx::stdx::string_view{u_id}}
+			<< finalize);
 		
 		std::cout << "successfully removed user" << std::endl;
 
@@ -405,11 +405,11 @@ int Provider::registerProvider(const std::string& pathForCert) {
 int Provider::notifyBlackListedToken(std::string uToken) {
 	
 	//Enable TLS Communications
-        auto creds = buildClientCredentials(false);
-        grpc::ChannelArguments channel_args = ChannelArguments();
-        channel_args.SetSslTargetNameOverride("cloud.foo");
+	auto creds = buildClientCredentials(false);
+	grpc::ChannelArguments channel_args = ChannelArguments();
+	channel_args.SetSslTargetNameOverride("cloud.foo");
 	std::unique_ptr<BackEndService::Stub> stub_(BackEndService::NewStub(grpc::CreateCustomChannel(
-					"0.0.0.0:50055",creds,channel_args)));
+		"0.0.0.0:50055",creds,channel_args)));
 
 	//Build request
 	UserToken request;
@@ -455,30 +455,29 @@ int Provider::storeProviderId(std::string providerid) {
 
 
 std::string Provider::getProviderId() {
-        try {
-                static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
-                static const mongocxx::client client(uri);
+	try {
+		static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
+		static const mongocxx::client client(uri);
 
-                auto collection = client["ProviderDB"]["edgeAccessControlData"];
+		auto collection = client["ProviderDB"]["edgeAccessControlData"];
 
-                bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one({});
+		bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one({});
 
-                if(maybe_result) {
-                        bsoncxx::document::view result_view = maybe_result.value().view();
-                        bsoncxx::document::element result_element = result_view["myProviderId"];
-                        std::string cert = result_element.get_utf8().value.to_string();
-                        std::cout << "Successfully found provider id!" << std::endl;
-                        return cert;
-                }
+		if(maybe_result) {
+			bsoncxx::document::view result_view = maybe_result.value().view();
+			bsoncxx::document::element result_element = result_view["myProviderId"];
+			std::string cert = result_element.get_utf8().value.to_string();
+			std::cout << "Successfully found provider id!" << std::endl;
+			return cert;
+		}
 
-                std::cerr << "[Provider.cc] Error, No Provider ID found" << '\n';
-                return "0";
-        } catch (std::exception &e) {
-                std::cerr << "[Provider.cc] " << e.what() << '\n';
-                std::cerr << "[Provider.cc] Error, querying the database failed in Provider::getProviderId" << std::endl;
-                return "";
-        }
-
+		std::cerr << "[Provider.cc] Error, No Provider ID found" << '\n';
+		return "0";
+	} catch (std::exception &e) {
+		std::cerr << "[Provider.cc] " << e.what() << '\n';
+		std::cerr << "[Provider.cc] Error, querying the database failed in Provider::getProviderId" << std::endl;
+		return "";
+	}
 }
 
 int Provider::storeUserData(const UserData *request, std::string token, std::string userId) {
@@ -510,119 +509,117 @@ int Provider::storeUserData(const UserData *request, std::string token, std::str
 
 std::shared_ptr<grpc::ChannelCredentials> Provider::buildClientCredentials(bool isSecure) {
 
-        if (!isSecure)
-                return std::shared_ptr<grpc::ChannelCredentials>(grpc::InsecureChannelCredentials());
+	if (!isSecure)
+		return std::shared_ptr<grpc::ChannelCredentials>(grpc::InsecureChannelCredentials());
 
-        std::string key = fileToString("../keys/provider.key");
-        std::string crt = fileToString("../keys/provider.crt");
-        std::string ca = fileToString("../keys/ca.crt");
-        grpc::SslCredentialsOptions tlsOpts;
-        tlsOpts.pem_cert_chain = crt;
-        tlsOpts.pem_private_key = key;
-        tlsOpts.pem_root_certs = ca;
-        std::shared_ptr<grpc::ChannelCredentials> creds = (grpc::SslCredentials(tlsOpts));
+	std::string key = fileToString("../keys/provider.key");
+	std::string crt = fileToString("../keys/provider.crt");
+	std::string ca = fileToString("../keys/ca.crt");
+	grpc::SslCredentialsOptions tlsOpts;
+	tlsOpts.pem_cert_chain = crt;
+	tlsOpts.pem_private_key = key;
+	tlsOpts.pem_root_certs = ca;
+	std::shared_ptr<grpc::ChannelCredentials> creds = (grpc::SslCredentials(tlsOpts));
 	return creds;
 }// end buildClientCredentials
 
 
 bool Provider::verifyUserCredentials(std::string username, std::string password) {
-try {
-                static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
-                static const mongocxx::client client(uri);
+	try {
+		static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
+		static const mongocxx::client client(uri);
 
-                auto collection = client["ProviderDB"]["userTable"];
+		auto collection = client["ProviderDB"]["userTable"];
 
-                bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
-                                document{} <<
-                                "username" << bsoncxx::oid{bsoncxx::stdx::string_view{username}}
-                                << finalize);
+		bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
+			document{} <<
+			"username" << bsoncxx::oid{bsoncxx::stdx::string_view{username}}
+			<< finalize);
 
-                if(maybe_result) {
-                        bsoncxx::document::view result_view = maybe_result.value().view();
-                        bsoncxx::document::element result_element = result_view["password"];
-                        std::string stored_pass = result_element.get_utf8().value.to_string();
-                        if (stored_pass.compare(password) == 0)
+		if(maybe_result) {
+			bsoncxx::document::view result_view = maybe_result.value().view();
+			bsoncxx::document::element result_element = result_view["password"];
+			std::string stored_pass = result_element.get_utf8().value.to_string();
+			if (stored_pass.compare(password) == 0)
 				return true;
 			else
 				return false;
-                }
+		}
 
-                std::cerr << "[Provider.cc] Error, No User found with that username" << '\n';
-                return false;
-        } catch (std::exception &e) {
-                std::cerr << "[Provider.cc] " << e.what() << '\n';
-                std::cerr << "[Provider.cc] Error, querying the database failed in Provider::getUserIdForUsername" << '\n';
-                return false;
-        }
-
+		std::cerr << "[Provider.cc] Error, No User found with that username" << '\n';
+		return false;
+	} catch (std::exception &e) {
+		std::cerr << "[Provider.cc] " << e.what() << '\n';
+		std::cerr << "[Provider.cc] Error, querying the database failed in Provider::getUserIdForUsername" << '\n';
+		return false;
+	}
 }
 
 std::string Provider::getUserIdForUsername(std::string username) {
-        try {
-                static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
-                static const mongocxx::client client(uri);
+	try {
+		static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
+		static const mongocxx::client client(uri);
 
-                auto collection = client["ProviderDB"]["userTable"];
+		auto collection = client["ProviderDB"]["userTable"];
 
-                bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
-                                document{} <<
-                                "username" << username
-                                << finalize);
+		bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
+			document{} <<
+			"username" << username
+			<< finalize);
 
-                if(maybe_result) {
-                        bsoncxx::document::view result_view = maybe_result.value().view();
-                        bsoncxx::document::element result_element = result_view["_id"];
-                        std::string u_id = result_element.get_utf8().value.to_string();
-                        std::cout << "Successfully found user id!" << std::endl;
-                        return u_id;
-                }
+		if(maybe_result) {
+			bsoncxx::document::view result_view = maybe_result.value().view();
+			bsoncxx::document::element result_element = result_view["_id"];
+			std::string u_id = result_element.get_utf8().value.to_string();
+			std::cout << "Successfully found user id!" << std::endl;
+			return u_id;
+		}
 
-                std::cerr << "[Provider.cc] Error, No User found with that username" << '\n';
-                return "0";
-        } catch (std::exception &e) {
-                std::cerr << "[Provider.cc] " << e.what() << '\n';
-                std::cerr << "[Provider.cc] Error, querying the database failed in Provider::getUserIdForUsername" << '\n';
-                return "";
-        }
-
+		std::cerr << "[Provider.cc] Error, No User found with that username" << '\n';
+		return "0";
+	} catch (std::exception &e) {
+		std::cerr << "[Provider.cc] " << e.what() << '\n';
+		std::cerr << "[Provider.cc] Error, querying the database failed in Provider::getUserIdForUsername" << '\n';
+		return "";
+	}
 }
 
 int Provider::getAccessLevelForContentName(std::string name) {
-        try {
-                static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
-                static const mongocxx::client client(uri);
+	try {
+		static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
+		static const mongocxx::client client(uri);
 
 		auto collection = client["ProviderDB"]["content"];
 
 
-                bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
-                                document{} <<
-                                "content_name" << name
-                                << finalize);
+		bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
+										document{} <<
+										"content_name" << name
+										<< finalize);
 
 
-                if(maybe_result) {
-                        bsoncxx::document::view result_view = maybe_result.value().view();
-                        bsoncxx::document::element result_element = result_view["access_level"];
+		if(maybe_result) {
+			bsoncxx::document::view result_view = maybe_result.value().view();
+			bsoncxx::document::element result_element = result_view["access_level"];
 			int access_level = int(result_element.get_int32().value);
-                        std::cout << "Successfully found access level!" << std::endl;
+			std::cout << "Successfully found access level!" << std::endl;
 			std::cout << access_level << std::endl;
 			return access_level;
-                }
+		}
 
-                std::cerr << "[Provider.cc] Error, No content found with that name" << '\n';
-                return -1;
-        } catch (std::exception &e) {
-                std::cerr << "[Provider.cc] " << e.what() << '\n';
-                std::cerr << "[Provider.cc] Error, querying the database failed in Provider::getAccessLevelForContentName" << '\n';
-                return -1;
-        }
+		std::cerr << "[Provider.cc] Error, No content found with that name" << '\n';
+		return -1;
+	} catch (std::exception &e) {
+		std::cerr << "[Provider.cc] " << e.what() << '\n';
+		std::cerr << "[Provider.cc] Error, querying the database failed in Provider::getAccessLevelForContentName" << '\n';
+		return -1;
+	}
 }
 
 bool Provider::updateUserToken(std::string u_id, std::string new_token) {
-        static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
-        static const mongocxx::client client(uri);
-        auto collection = client["ProviderDB"]["userTable"];
+	static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
+	static const mongocxx::client client(uri);
+	auto collection = client["ProviderDB"]["userTable"];
 
 	auto result = collection.update_one(document{} << "_id" << bsoncxx::oid{bsoncxx::stdx::string_view{u_id}} << finalize, document{} << "$set" << open_document << "token" << new_token << close_document << finalize);	
 
@@ -637,12 +634,12 @@ bool Provider::updateUserToken(std::string u_id, std::string new_token) {
 
 
 bool Provider::updateCertForUserId(std::string u_id, std::string cert) {
-        static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
-        static const mongocxx::client client(uri);
+	static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
+	static const mongocxx::client client(uri);
 
-        auto collection = client["ProviderDB"]["userTable"];
+	auto collection = client["ProviderDB"]["userTable"];
 
-        auto result = collection.update_one(document{} << "_id" << bsoncxx::oid{bsoncxx::stdx::string_view{u_id}} << finalize, document{} << "$set" << open_document << "uCert" << cert << close_document << finalize); 
+	auto result = collection.update_one(document{} << "_id" << bsoncxx::oid{bsoncxx::stdx::string_view{u_id}} << finalize, document{} << "$set" << open_document << "uCert" << cert << close_document << finalize); 
 	
 	if(!result)
 		return false;
@@ -733,33 +730,33 @@ int Provider::buildKeyDatabase() {
 }
 
 std::string Provider::getAccessKeyForLevel(int level) {
-        try {
-                static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
-                static const mongocxx::client client(uri);
+	try {
+		static const mongocxx::uri uri("mongodb://127.0.0.1:27017");
+		static const mongocxx::client client(uri);
 
-                auto collection = client["ProviderDB"]["keys"];
+		auto collection = client["ProviderDB"]["keys"];
 
-                bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
-                                document{} <<
-                                "access_level" << level
-                                << finalize);
+		bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(
+			document{} <<
+			"access_level" << level
+			<< finalize);
 
-                if(maybe_result) {
-                        bsoncxx::document::view result_view = maybe_result.value().view();
-                        bsoncxx::document::element result_element = result_view["sym_key"];
-                        std::string sym_key = result_element.get_utf8().value.to_string();
+		if(maybe_result) {
+			bsoncxx::document::view result_view = maybe_result.value().view();
+			bsoncxx::document::element result_element = result_view["sym_key"];
+			std::string sym_key = result_element.get_utf8().value.to_string();
 			std::cout << sym_key << std::endl;
-                        std::cout << "Successfully found access key!" << std::endl;
-                        return sym_key;
-                }
+			std::cout << "Successfully found access key!" << std::endl;
+			return sym_key;
+		}
 
-                std::cerr << "[Provider.cc] Error, No key found with that access level" << '\n';
-                return "";
-        } catch (std::exception &e) {
-                std::cerr << "[Provider.cc] " << e.what() << '\n';
-                std::cerr << "[Provider.cc] Error, querying the database failed in Provider::getAccessKeyForLevel" << '\n';
-                return "";
-        }
+		std::cerr << "[Provider.cc] Error, No key found with that access level" << '\n';
+		return "";
+	} catch (std::exception &e) {
+		std::cerr << "[Provider.cc] " << e.what() << '\n';
+		std::cerr << "[Provider.cc] Error, querying the database failed in Provider::getAccessKeyForLevel" << '\n';
+		return "";
+	}
 }
 
 std::string Provider::encryptDataForAccessLevel(std::string content_name, std::string data) {
