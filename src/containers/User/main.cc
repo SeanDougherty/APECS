@@ -89,17 +89,13 @@ void prompt(User *user) {
 				reply = user->requestService();
 				break;
 			case 5:
-                {
-                struct SetupVars* setupvars = c_setup();
-                std::cout << "this happened" << std::endl;
-                struct EncryptVars* encryptvars = c_encrypt(setupvars);
-                std::cout << "then this happened" << std::endl;
-                int resu = c_decrypt(setupvars, encryptvars);
-                std::cout << "finally this happened" << std::endl;
-
-				//reply = user->placeholder();
+				struct SetupVars* setupvars = c_setup();
+				std::cout << "this happened" << std::endl;
+				struct EncryptVars* encryptvars = c_encrypt(setupvars);
+				std::cout << "then this happened" << std::endl;
+				int resu = c_decrypt(setupvars, encryptvars);
+				std::cout << "finally this happened" << std::endl;
 				break;
-                }
 			default:
 				std::cout << "What??" << std::endl;
 				break;

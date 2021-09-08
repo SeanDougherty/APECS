@@ -57,7 +57,7 @@ int User::registerUser() {
  * Request data through edge server
  */
 int User::requestData(std::string content_name) {
-    //Error Checking
+
     if (this->m_user_token == ""){
         std::cout << "no user token stored, please register as a user before requesting data" << std::endl;
         return 0;
@@ -65,58 +65,57 @@ int User::requestData(std::string content_name) {
 
     int test_ct = 4;
 
-        int elapsed_times [test_ct];
+		int elapsed_times [test_ct];
 
 
     for (int i=0; i < test_ct; i++) {
-                auto start = std::chrono::high_resolution_clock::now();
+			auto start = std::chrono::high_resolution_clock::now();
 
-        //Enable TLS Communications
-        auto creds = buildClientCredentials(false);
-        grpc::ChannelArguments channel_args = ChannelArguments();
-        channel_args.SetSslTargetNameOverride("edgeserver.foo");
-        std::unique_ptr<EdgeServerService::Stub> stub_(EdgeServerService::NewStub(
-                    grpc::CreateCustomChannel("0.0.0.0:50033",creds,channel_args)));
+			//Enable TLS Communications
+			auto creds = buildClientCredentials(false);
+			grpc::ChannelArguments channel_args = ChannelArguments();
+			channel_args.SetSslTargetNameOverride("edgeserver.foo");
+			std::unique_ptr<EdgeServerService::Stub> stub_(EdgeServerService::NewStub(
+									grpc::CreateCustomChannel("0.0.0.0:50033",creds,channel_args)));
 
-        
-        std::string service_request = buildServiceRequest(content_name);
-        std::string signature = signServiceRequest(service_request);
+			
+			std::string service_request = buildServiceRequest(content_name);
+			std::string signature = signServiceRequest(service_request);
 
-        
-        //Build request
-        UserDataRequest request;
-        request.set_user_token(this->m_user_token);
-        request.set_content_name(content_name);
-        request.set_signature(signature);
+			
+			//Build request
+			UserDataRequest request;
+			request.set_user_token(this->m_user_token);
+			request.set_content_name(content_name);
+			request.set_signature(signature);
 
-        //Build necessary variables
-        DataPayload reply;
-        ClientContext context;
+			//Build necessary variables
+			DataPayload reply;
+			ClientContext context;
 
-        //Call API
-        Status status = stub_->requestData(&context, request, &reply);
+			//Call API
+			Status status = stub_->requestData(&context, request, &reply);
 
 
-        //Handle response
-        if (status.ok()) {
-            handleDataReceived(&reply);
-        } else {
-            std::cout << "Error in User::requestData" << std::endl;
-            std::cout << "Message Recieved: " << reply.msg() << std::endl;
-        
-        }
-        auto stop = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop-start);
-        int microseconds = int(duration.count());
-        elapsed_times[i] = microseconds;
+			//Handle response
+			if (status.ok()) {
+					handleDataReceived(&reply);
+			} else {
+					std::cout << "Error in User::requestData" << std::endl;
+					std::cout << "Message Recieved: " << reply.msg() << std::endl;
+			}
+			auto stop = std::chrono::high_resolution_clock::now();
+			auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop-start);
+			int microseconds = int(duration.count());
+			elapsed_times[i] = microseconds;
     }
 
-        std::string alls = "";
+		std::string alls = "";
     for(int j=0; j < test_ct; j++) {
         if (j < test_ct-1) {
-                        alls = alls + std::to_string(elapsed_times[j]) + ", ";
+					alls = alls + std::to_string(elapsed_times[j]) + ", ";
         } else {
-                        alls = alls + std::to_string(elapsed_times[j]);
+					alls = alls + std::to_string(elapsed_times[j]);
         }
     }
     stringToFile(alls, "data_full_runtimes.csv");
@@ -136,35 +135,35 @@ int User::requestService() {
 	std::string payload = fileToString("./decrypted_text.txt");
 	//Load in cryptographic values
 	py::module_ mabe = py::module_::import("mabe");	//Enable TLS Communications
-    struct SetupVars* setupvars = c_setup();	
+	struct SetupVars* setupvars = c_setup();	
 
-    // SetupVars
-    std::string Y (reinterpret_cast<char*>(setupvars-> Y ), setupvars->Y_len);
-    std::string g2 (reinterpret_cast<char*>(setupvars-> g2 ), setupvars->g2_len);
-    std::string T_1a1 (reinterpret_cast<char*>(setupvars-> T_1a1 ), setupvars->T_1a1_len);
-    std::string T_1a2 (reinterpret_cast<char*>(setupvars-> T_1a2 ), setupvars->T_1a2_len);
-    std::string T_2a2 (reinterpret_cast<char*>(setupvars-> T_2a2 ), setupvars->T_2a2_len);
-    std::string T_2a3 (reinterpret_cast<char*>(setupvars-> T_2a3 ), setupvars->T_2a3_len);
-    std::string T_3a1 (reinterpret_cast<char*>(setupvars-> T_3a1 ), setupvars->T_3a1_len);
-    std::string T_3a3 (reinterpret_cast<char*>(setupvars-> T_3a3 ), setupvars->T_3a3_len);
-    std::string S_1_1_u1 (reinterpret_cast<char*>(setupvars-> S_1_1_u1 ), setupvars->S_1_1_u1_len);
-    std::string g1 (reinterpret_cast<char*>(setupvars-> g1 ), setupvars->g1_len);
-    std::string coeff_auth1_u1_0 (reinterpret_cast<char*>(setupvars-> coeff_auth1_u1_0 ), setupvars->coeff_auth1_u1_0_len);
-    std::string coeff_auth1_u1_1 (reinterpret_cast<char*>(setupvars-> coeff_auth1_u1_1 ), setupvars->coeff_auth1_u1_1_len);
-    std::string S_1_2_u1 (reinterpret_cast<char*>(setupvars-> S_1_2_u1 ), setupvars->S_1_2_u1_len);
-    std::string S_2_2_u1 (reinterpret_cast<char*>(setupvars-> S_2_2_u1 ), setupvars->S_2_2_u1_len);
-    std::string coeff_auth2_u1_0 (reinterpret_cast<char*>(setupvars-> coeff_auth2_u1_0 ), setupvars->coeff_auth2_u1_0_len);
-    std::string coeff_auth2_u1_1 (reinterpret_cast<char*>(setupvars-> coeff_auth2_u1_1 ), setupvars->coeff_auth2_u1_1_len);
-    std::string S_2_3_u1 (reinterpret_cast<char*>(setupvars-> S_2_3_u1 ), setupvars->S_2_3_u1_len);
-    std::string coeff_auth3_u1_0 (reinterpret_cast<char*>(setupvars-> coeff_auth3_u1_0 ), setupvars->coeff_auth3_u1_0_len);
-    std::string coeff_auth3_u1_1 (reinterpret_cast<char*>(setupvars-> coeff_auth3_u1_1 ), setupvars->coeff_auth3_u1_1_len);
-    std::string S_3_1_u1 (reinterpret_cast<char*>(setupvars-> S_3_1_u1 ), setupvars->S_3_1_u1_len);
-    std::string S_3_3_u1 (reinterpret_cast<char*>(setupvars-> S_3_3_u1 ), setupvars->S_3_3_u1_len);
-    std::string D_u1 (reinterpret_cast<char*>(setupvars-> D_u1 ), setupvars->D_u1_len);
-    std::string temp_1_GT (reinterpret_cast<char*>(setupvars-> temp_1_GT ), setupvars->temp_1_GT_len);
-    std::string temp_1_Zr (reinterpret_cast<char*>(setupvars-> temp_1_Zr ), setupvars->temp_1_Zr_len);
-    std::string temp_2_Zr (reinterpret_cast<char*>(setupvars-> temp_2_Zr ), setupvars->temp_2_Zr_len);
-    std::string e_g1g2 (reinterpret_cast<char*>(setupvars-> e_g1g2 ), setupvars->e_g1g2_len);
+	// SetupVars
+	std::string Y (reinterpret_cast<char*>(setupvars-> Y ), setupvars->Y_len);
+	std::string g2 (reinterpret_cast<char*>(setupvars-> g2 ), setupvars->g2_len);
+	std::string T_1a1 (reinterpret_cast<char*>(setupvars-> T_1a1 ), setupvars->T_1a1_len);
+	std::string T_1a2 (reinterpret_cast<char*>(setupvars-> T_1a2 ), setupvars->T_1a2_len);
+	std::string T_2a2 (reinterpret_cast<char*>(setupvars-> T_2a2 ), setupvars->T_2a2_len);
+	std::string T_2a3 (reinterpret_cast<char*>(setupvars-> T_2a3 ), setupvars->T_2a3_len);
+	std::string T_3a1 (reinterpret_cast<char*>(setupvars-> T_3a1 ), setupvars->T_3a1_len);
+	std::string T_3a3 (reinterpret_cast<char*>(setupvars-> T_3a3 ), setupvars->T_3a3_len);
+	std::string S_1_1_u1 (reinterpret_cast<char*>(setupvars-> S_1_1_u1 ), setupvars->S_1_1_u1_len);
+	std::string g1 (reinterpret_cast<char*>(setupvars-> g1 ), setupvars->g1_len);
+	std::string coeff_auth1_u1_0 (reinterpret_cast<char*>(setupvars-> coeff_auth1_u1_0 ), setupvars->coeff_auth1_u1_0_len);
+	std::string coeff_auth1_u1_1 (reinterpret_cast<char*>(setupvars-> coeff_auth1_u1_1 ), setupvars->coeff_auth1_u1_1_len);
+	std::string S_1_2_u1 (reinterpret_cast<char*>(setupvars-> S_1_2_u1 ), setupvars->S_1_2_u1_len);
+	std::string S_2_2_u1 (reinterpret_cast<char*>(setupvars-> S_2_2_u1 ), setupvars->S_2_2_u1_len);
+	std::string coeff_auth2_u1_0 (reinterpret_cast<char*>(setupvars-> coeff_auth2_u1_0 ), setupvars->coeff_auth2_u1_0_len);
+	std::string coeff_auth2_u1_1 (reinterpret_cast<char*>(setupvars-> coeff_auth2_u1_1 ), setupvars->coeff_auth2_u1_1_len);
+	std::string S_2_3_u1 (reinterpret_cast<char*>(setupvars-> S_2_3_u1 ), setupvars->S_2_3_u1_len);
+	std::string coeff_auth3_u1_0 (reinterpret_cast<char*>(setupvars-> coeff_auth3_u1_0 ), setupvars->coeff_auth3_u1_0_len);
+	std::string coeff_auth3_u1_1 (reinterpret_cast<char*>(setupvars-> coeff_auth3_u1_1 ), setupvars->coeff_auth3_u1_1_len);
+	std::string S_3_1_u1 (reinterpret_cast<char*>(setupvars-> S_3_1_u1 ), setupvars->S_3_1_u1_len);
+	std::string S_3_3_u1 (reinterpret_cast<char*>(setupvars-> S_3_3_u1 ), setupvars->S_3_3_u1_len);
+	std::string D_u1 (reinterpret_cast<char*>(setupvars-> D_u1 ), setupvars->D_u1_len);
+	std::string temp_1_GT (reinterpret_cast<char*>(setupvars-> temp_1_GT ), setupvars->temp_1_GT_len);
+	std::string temp_1_Zr (reinterpret_cast<char*>(setupvars-> temp_1_Zr ), setupvars->temp_1_Zr_len);
+	std::string temp_2_Zr (reinterpret_cast<char*>(setupvars-> temp_2_Zr ), setupvars->temp_2_Zr_len);
+	std::string e_g1g2 (reinterpret_cast<char*>(setupvars-> e_g1g2 ), setupvars->e_g1g2_len);
 
 
 	int test_ct = 10;
@@ -188,28 +187,28 @@ int User::requestService() {
 		std::string setup_json;
 		std::string enc_json;
 		auto enc_start = std::chrono::high_resolution_clock::now();
-        struct EncryptVars* encryptvars = c_encrypt(setupvars);
+		struct EncryptVars* encryptvars = c_encrypt(setupvars);
 		auto enc_stop = std::chrono::high_resolution_clock::now();
-        // EncryptVars
-        std::string E_0 (reinterpret_cast<const char*>(encryptvars-> E_0 ), encryptvars->E_0_len);
-        std::string E_1 (reinterpret_cast<const char*>(encryptvars-> E_1 ), encryptvars->E_1_len);
-        std::string C_1_1 (reinterpret_cast<const char*>(encryptvars-> C_1_1 ), encryptvars->C_1_1_len);
-        
-        std::string C_1_2 (reinterpret_cast<const char*>(encryptvars-> C_1_2 ), encryptvars->C_1_2_len);
-        std::string C_2_2 (reinterpret_cast<const char*>(encryptvars-> C_2_2 ), encryptvars->C_2_2_len);
-        std::string C_2_3 (reinterpret_cast<const char*>(encryptvars-> C_2_3 ), encryptvars->C_2_3_len);
-        std::string C_3_1 (reinterpret_cast<const char*>(encryptvars-> C_3_1 ), encryptvars->C_3_1_len);
-        std::string C_3_3 (reinterpret_cast<const char*>(encryptvars-> C_3_3 ), encryptvars->C_3_3_len);
-        std::string msg (reinterpret_cast<const char*>(encryptvars-> msg ), encryptvars->msg_len);
-        std::string s (reinterpret_cast<const char*>(encryptvars-> s ), encryptvars->s_len);
-        std::string L1_0_Auth1 (reinterpret_cast<const char*>(encryptvars-> L1_0_Auth1 ), encryptvars->L1_0_Auth1_len);
-        std::string L2_0_Auth1 (reinterpret_cast<const char*>(encryptvars-> L2_0_Auth1 ), encryptvars->L2_0_Auth1_len);
-        std::string L2_0_Auth2 (reinterpret_cast<const char*>(encryptvars-> L2_0_Auth2 ), encryptvars->L2_0_Auth2_len);
-        std::string L3_0_Auth2 (reinterpret_cast<const char*>(encryptvars-> L3_0_Auth2 ), encryptvars->L3_0_Auth2_len);
-        std::string L1_0_Auth3 (reinterpret_cast<const char*>(encryptvars-> L1_0_Auth3 ), encryptvars->L1_0_Auth3_len);
-        std::string L3_0_Auth3 (reinterpret_cast<const char*>(encryptvars-> L3_0_Auth3 ), encryptvars->L3_0_Auth3_len);
+		// EncryptVars
+		std::string E_0 (reinterpret_cast<const char*>(encryptvars-> E_0 ), encryptvars->E_0_len);
+		std::string E_1 (reinterpret_cast<const char*>(encryptvars-> E_1 ), encryptvars->E_1_len);
+		std::string C_1_1 (reinterpret_cast<const char*>(encryptvars-> C_1_1 ), encryptvars->C_1_1_len);
+		
+		std::string C_1_2 (reinterpret_cast<const char*>(encryptvars-> C_1_2 ), encryptvars->C_1_2_len);
+		std::string C_2_2 (reinterpret_cast<const char*>(encryptvars-> C_2_2 ), encryptvars->C_2_2_len);
+		std::string C_2_3 (reinterpret_cast<const char*>(encryptvars-> C_2_3 ), encryptvars->C_2_3_len);
+		std::string C_3_1 (reinterpret_cast<const char*>(encryptvars-> C_3_1 ), encryptvars->C_3_1_len);
+		std::string C_3_3 (reinterpret_cast<const char*>(encryptvars-> C_3_3 ), encryptvars->C_3_3_len);
+		std::string msg (reinterpret_cast<const char*>(encryptvars-> msg ), encryptvars->msg_len);
+		std::string s (reinterpret_cast<const char*>(encryptvars-> s ), encryptvars->s_len);
+		std::string L1_0_Auth1 (reinterpret_cast<const char*>(encryptvars-> L1_0_Auth1 ), encryptvars->L1_0_Auth1_len);
+		std::string L2_0_Auth1 (reinterpret_cast<const char*>(encryptvars-> L2_0_Auth1 ), encryptvars->L2_0_Auth1_len);
+		std::string L2_0_Auth2 (reinterpret_cast<const char*>(encryptvars-> L2_0_Auth2 ), encryptvars->L2_0_Auth2_len);
+		std::string L3_0_Auth2 (reinterpret_cast<const char*>(encryptvars-> L3_0_Auth2 ), encryptvars->L3_0_Auth2_len);
+		std::string L1_0_Auth3 (reinterpret_cast<const char*>(encryptvars-> L1_0_Auth3 ), encryptvars->L1_0_Auth3_len);
+		std::string L3_0_Auth3 (reinterpret_cast<const char*>(encryptvars-> L3_0_Auth3 ), encryptvars->L3_0_Auth3_len);
 
-        c_free_encrypt(encryptvars);
+		c_free_encrypt(encryptvars);
 		auto sym_start = std::chrono::high_resolution_clock::now();	
 		py::object payload_data = mabe.attr("encryptPayload2")("12345678901234567890", payload);
 		auto sym_stop = std::chrono::high_resolution_clock::now();
@@ -226,50 +225,50 @@ int User::requestService() {
 		request.set_abe_setup_json(setup_json);
 		request.set_abe_enc_json(enc_json);
 		request.set_signature(signature);
-        request.set_y(Y);
-        request.set_g2( g2 );
-        request.set_t_1a1( T_1a1 );
-        request.set_t_1a2( T_1a2 );
-        request.set_t_2a2( T_2a2 );
-        request.set_t_2a3( T_2a3 );
-        request.set_t_3a1( T_3a1 );
-        request.set_t_3a3( T_3a3 ); 
-        request.set_s_1_1_u1( S_1_1_u1 );
-        request.set_g1( g1 );
-        request.set_coeff_auth1_u1_0( coeff_auth1_u1_0 );
-        request.set_coeff_auth1_u1_1( coeff_auth1_u1_1 );
-        request.set_s_1_2_u1( S_1_2_u1 );
-        request.set_s_2_2_u1( S_2_2_u1 );
-        request.set_coeff_auth2_u1_0( coeff_auth2_u1_0 ); 
-        request.set_coeff_auth2_u1_1( coeff_auth2_u1_1 );
-        request.set_s_2_3_u1( S_2_3_u1 );
-        request.set_coeff_auth3_u1_0( coeff_auth3_u1_0 );
-        request.set_coeff_auth3_u1_1( coeff_auth3_u1_1 );
-        request.set_s_3_1_u1( S_3_1_u1 );
-        request.set_s_3_3_u1( S_3_3_u1 );
-        request.set_d_u1( D_u1 );
-        request.set_temp_1_gt( temp_1_GT );
-        request.set_temp_1_zr( temp_1_Zr );
-        request.set_temp_2_zr( temp_2_Zr );
-        request.set_e_g1g2( e_g1g2 );
+		request.set_y(Y);
+		request.set_g2( g2 );
+		request.set_t_1a1( T_1a1 );
+		request.set_t_1a2( T_1a2 );
+		request.set_t_2a2( T_2a2 );
+		request.set_t_2a3( T_2a3 );
+		request.set_t_3a1( T_3a1 );
+		request.set_t_3a3( T_3a3 ); 
+		request.set_s_1_1_u1( S_1_1_u1 );
+		request.set_g1( g1 );
+		request.set_coeff_auth1_u1_0( coeff_auth1_u1_0 );
+		request.set_coeff_auth1_u1_1( coeff_auth1_u1_1 );
+		request.set_s_1_2_u1( S_1_2_u1 );
+		request.set_s_2_2_u1( S_2_2_u1 );
+		request.set_coeff_auth2_u1_0( coeff_auth2_u1_0 ); 
+		request.set_coeff_auth2_u1_1( coeff_auth2_u1_1 );
+		request.set_s_2_3_u1( S_2_3_u1 );
+		request.set_coeff_auth3_u1_0( coeff_auth3_u1_0 );
+		request.set_coeff_auth3_u1_1( coeff_auth3_u1_1 );
+		request.set_s_3_1_u1( S_3_1_u1 );
+		request.set_s_3_3_u1( S_3_3_u1 );
+		request.set_d_u1( D_u1 );
+		request.set_temp_1_gt( temp_1_GT );
+		request.set_temp_1_zr( temp_1_Zr );
+		request.set_temp_2_zr( temp_2_Zr );
+		request.set_e_g1g2( e_g1g2 );
 
-        // encryptVars
-        request.set_e_0( E_0 );
-        request.set_e_1( E_1 );
-        request.set_c_1_1( C_1_1 );
-        request.set_c_1_2( C_1_2 );
-        request.set_c_2_2( C_2_2 );
-        request.set_c_2_3( C_2_3 );
-        request.set_c_3_1( C_3_1 );
-        request.set_c_3_3( C_3_3 );
-        request.set_msg( msg );
-        request.set_s( s );
-        request.set_l1_0_auth1( L1_0_Auth1 );
-        request.set_l2_0_auth1( L2_0_Auth1 );
-        request.set_l2_0_auth2( L2_0_Auth2 );
-        request.set_l3_0_auth2( L3_0_Auth2 );
-        request.set_l1_0_auth3( L1_0_Auth3 );
-        request.set_l3_0_auth3( L3_0_Auth3 );
+		// encryptVars
+		request.set_e_0( E_0 );
+		request.set_e_1( E_1 );
+		request.set_c_1_1( C_1_1 );
+		request.set_c_1_2( C_1_2 );
+		request.set_c_2_2( C_2_2 );
+		request.set_c_2_3( C_2_3 );
+		request.set_c_3_1( C_3_1 );
+		request.set_c_3_3( C_3_3 );
+		request.set_msg( msg );
+		request.set_s( s );
+		request.set_l1_0_auth1( L1_0_Auth1 );
+		request.set_l2_0_auth1( L2_0_Auth1 );
+		request.set_l2_0_auth2( L2_0_Auth2 );
+		request.set_l3_0_auth2( L3_0_Auth2 );
+		request.set_l1_0_auth3( L1_0_Auth3 );
+		request.set_l3_0_auth3( L3_0_Auth3 );
 
 
 		ServiceResponse reply;
@@ -350,8 +349,8 @@ int User::requestRevocation() {
 	auto creds = buildClientCredentials(false);
 	grpc::ChannelArguments channel_args = ChannelArguments();
 	channel_args.SetSslTargetNameOverride("provider.foo");
-        std::unique_ptr<ProviderService::Stub> stub_(ProviderService::NewStub(
-				grpc::CreateCustomChannel("0.0.0.0:50077",creds,channel_args)));
+	std::unique_ptr<ProviderService::Stub> stub_(ProviderService::NewStub(
+	grpc::CreateCustomChannel("0.0.0.0:50077",creds,channel_args)));
 
 	//Build revocation request
 	std::string revocRequest = buildRevocRequest();
@@ -387,35 +386,34 @@ int User::requestRevocation() {
 
 int User::renewToken(){
  	//Enable TLS Communications
-        auto creds = buildClientCredentials(false);
-        grpc::ChannelArguments channel_args = ChannelArguments();
-        channel_args.SetSslTargetNameOverride("provider.foo");
+	auto creds = buildClientCredentials(false);
+	grpc::ChannelArguments channel_args = ChannelArguments();
+	channel_args.SetSslTargetNameOverride("provider.foo");
 
-        std::unique_ptr<ProviderService::Stub> stub_(ProviderService::NewStub(
-                                grpc::CreateCustomChannel("192.122.236.103:50077",creds,channel_args)));
+	std::unique_ptr<ProviderService::Stub> stub_(ProviderService::NewStub(
+													grpc::CreateCustomChannel("192.122.236.103:50077",creds,channel_args)));
 
-        //Build request
-        UserCredentials request;
-        request.set_username(this->m_username);
-        request.set_password(this->m_password);
+	//Build request
+	UserCredentials request;
+	request.set_username(this->m_username);
+	request.set_password(this->m_password);
 
-        //Build necessary variables
-        NewToken reply;
-        ClientContext context;
+	//Build necessary variables
+	NewToken reply;
+	ClientContext context;
 
-        //Call API
-        Status status = stub_->renewToken(&context,request,&reply);
+	//Call API
+	Status status = stub_->renewToken(&context,request,&reply);
 
-        //Handle response
-        if (status.ok()) {
+	//Handle response
+	if (status.ok()) {
 		this->m_user_token = reply.user_token();
-                std::cout << "status okay from provider" << std::endl;
-                return 1;
-        } else {
-                std::cout << "Error communication w/ Provider in User::renewToken" << std::endl;
-                return 0;
-        }
-	
+		std::cout << "status okay from provider" << std::endl;
+		return 1;
+	} else {
+		std::cout << "Error communication w/ Provider in User::renewToken" << std::endl;
+		return 0;
+	}
 }
 
 
@@ -423,9 +421,6 @@ int User::renewToken(){
  *              User Helper Methods             *
  ************************************************/
 
-/*
- *
- */
 int User::handleDataReceived(DataPayload* reply) {
 	std::string data = reply->data();
 	int access_level = reply->access_level();
@@ -443,7 +438,6 @@ int User::handleDataReceived(DataPayload* reply) {
 
 	std::string plaintext = symDec(data, sym_key_dec);
 
-	// return 0
 	return 0;
 }
 
@@ -460,7 +454,7 @@ std::string User::buildServiceRequest(std::string service_data) {
 std::string User::signServiceRequest(std::string service_request) {
 	std::string key = fileToString("../keys/user.key");
 	std::string signature = sign(key, service_request);
-       	return signature;	
+	return signature;	
 }
 
 
@@ -477,7 +471,7 @@ std::string User::buildRevocRequest() {
  * 
  */
 std::string User::signRevocRequest(std::string request) {
-        std::string key = fileToString("../keys/user.key");
+	std::string key = fileToString("../keys/user.key");
 	std::string signature = sign(key, request);
 	return signature;
 }// end signRevocRequest
@@ -508,14 +502,14 @@ std::shared_ptr<grpc::ChannelCredentials> User::buildClientCredentials(bool isSe
 
 std::vector<std::string> User::split(std::string str,std::string sep){
 	char* cstr=const_cast<char*>(str.c_str());
-        char* current;
+	char* current;
 	std::vector<std::string> arr;
-        current=strtok(cstr,sep.c_str());
+	current=strtok(cstr,sep.c_str());
 	while(current!=NULL){
-            arr.push_back(current);
-            current=strtok(NULL,sep.c_str());
-        }
-        return arr;
+		arr.push_back(current);
+		current=strtok(NULL,sep.c_str());
+	}
+	return arr;
 }
 
 void User::setUserCert() {

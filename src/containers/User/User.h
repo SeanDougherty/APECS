@@ -4,7 +4,6 @@
  *
  * User program to utilize the access control
  *
- * What the user can do:
  *
  *******************************************************************************
  */
